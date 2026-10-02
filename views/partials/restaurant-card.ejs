@@ -1,0 +1,35 @@
+<a href="/restaurant/<%= r._id %>" class="restaurant-card">
+  <div class="rc-img-wrap">
+    <img src="<%= r.coverImage %>" alt="<%= r.name %>" loading="lazy" class="rc-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80'">
+    <% if (r.offer) { %>
+    <div class="rc-offer-badge"><i class="ri-percent-line"></i> <%= r.offer %></div>
+    <% } %>
+    <% if (r.isVeg) { %>
+    <div class="rc-veg-badge"><div class="veg-dot"></div> Pure Veg</div>
+    <% } %>
+    <button class="rc-fav-btn <%= typeof isFavorited !== 'undefined' && isFavorited ? 'favorited' : '' %>"
+      onclick="event.preventDefault(); toggleFavorite('<%= r._id %>', this)"
+      aria-label="Save Restaurant">
+      <i class="ri-heart<%= typeof isFavorited !== 'undefined' && isFavorited ? '-fill' : '-line' %>"></i>
+    </button>
+    <div class="rc-delivery-badge"><i class="ri-time-line"></i> <%= r.deliveryTime %></div>
+  </div>
+  <div class="rc-body">
+    <div class="rc-top-row">
+      <h3 class="rc-name"><%= r.name %></h3>
+      <div class="rc-rating">
+        <i class="ri-star-fill"></i>
+        <span><%= r.rating.toFixed(1) %></span>
+      </div>
+    </div>
+    <p class="rc-cuisine"><%= r.cuisine.slice(0,3).join(' • ') %></p>
+    <div class="rc-meta">
+      <span class="rc-price"><%= r.priceRange %> for two</span>
+      <span class="rc-dot">·</span>
+      <span class="rc-area"><i class="ri-map-pin-line"></i> <%= r.area %></span>
+    </div>
+    <% if (!r.isOpen) { %>
+    <div class="rc-closed-badge">Currently Closed</div>
+    <% } %>
+  </div>
+</a>

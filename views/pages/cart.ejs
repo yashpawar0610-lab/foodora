@@ -1,0 +1,149 @@
+<div class="page-cart">
+  <div class="container">
+    <h1 class="page-title"><i class="ri-shopping-bag-line"></i> Your Cart</h1>
+
+    <% if (cart.length === 0) { %>
+    <div class="cart-empty-page">
+      <div class="cep-icon">🛒</div>
+      <h2>Your cart is empty</h2>
+      <p>Looks like you haven't added anything yet.</p>
+      <a href="/restaurants" class="btn-primary-lg">Browse Restaurants</a>
+    </div>
+    <% } else { %>
+
+    <div class="cart-layout">
+      <!-- Cart Items -->
+      <div class="cart-items-col">
+        <div class="cart-restaurant-header">
+          <i class="ri-store-2-fill"></i> <%= cart[0].restaurantName %>
+          <button class="clear-cart-btn" onclick="clearCart()">Clear Cart</button>
+        </div>
+
+        <div id="cartItemsList">
+          <% cart.forEach(item => { %>
+          <div class="cart-item-row" id="cir-<%= item.key.replace(/[^a-z0-9]/gi, '') %>">
+            <div class="cir-veg-dot <%= item.isVeg ? 'veg' : 'non-veg' %>"></div>
+            <img src="<%= item.image %>" alt="<%= item.name %>" class="cir-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'">
+            <div class="cir-info">
+              <h4 class="cir-name"><%= item.name %></h4>
+              <% if (item.spiceLevel) { %><p class="cir-meta"><i class="ri-fire-line"></i> <%= item.spiceLevel %></p><% } %>
+              <% if (item.specialInstructions) { %><p class="cir-note"><i class="ri-pencil-line"></i> <%= item.specialInstructions %></p><% } %>
+            </div>
+            <div class="cir-qty-wrap">
+              <div class="qty-stepper">
+                <button class="qs-btn" onclick="updateCartQty('<%= item.key %>', <%= item.qty - 1 %>)">−</button>
+                <span class="qs-val"><%= item.qty %></span>
+                <button class="qs-btn" onclick="updateCartQty('<%= item.key %>', <%= item.qty + 1 %>)">+</button>
+              </div>
+              <p class="cir-price">₹<%= (item.price * item.qty).toFixed(0) %></p>
+              <button class="cir-remove" onclick="removeFromCart('<%= item.key %>')"><i class="ri-delete-bin-line"></i></button>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="cart-summary-col">
+        <div class="cart-summary-card">
+          <h3 class="cs-title">Order Summary</h3>
+
+          <div class="cs-row"><span>Item Total</span><span id="csSubtotal">₹<%= subtotal.toFixed(0) %></span></div>
+          <div class="cs-row"><span>Delivery Fee</span><span id="csDelivery">₹40</span></div>
+          <div class="cs-row"><span>Taxes & Charges (5%)</span><span id="csTax">₹<%= Math.round(subtotal * 0.05) %></span></div>
+
+          <!-- Coupon Section -->
+          <div class="coupon-section">
+            <div class="coupon-input-row">
+              <input type="text" id="couponInput" placeholder="Enter coupon code" maxlength="20">
+              <button id="applyCouponBtn" onclick="applyCoupon()">Apply</button>
+            </div>
+            <p id="couponMsg" class="coupon-msg"></p>
+          </div>
+
+          <% if (subtotal > 0) { %>
+          <div class="cs-row discount-row hidden" id="discountRow">
+            <span>Discount</span><span id="csDiscount" style="color:var(--success)">-₹0</span>
+          </div>
+          <% } %>
+
+          <div class="cs-divider"></div>
+          <div class="cs-row cs-total-row">
+            <span>To Pay</span>
+            <span id="csTotal">₹<%= (subtotal + 40 + Math.round(subtotal * 0.05)).toFixed(0) %></span>
+          </div>
+
+          <a href="/checkout" class="btn-checkout-full" id="checkoutBtn">Proceed to Checkout →</a>
+
+          <div class="savings-note" id="savingsNote">
+            <% if (subtotal >= 299) { %>
+            <i class="ri-check-line"></i> You get FREE delivery on this order!
+            <% } else { %>
+            <i class="ri-information-line"></i> Add ₹<%= 299 - subtotal %> more for free delivery
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Available Coupons -->
+        <div class="available-coupons">
+          <h4><i class="ri-coupon-3-line"></i> Available Offers</h4>
+          <% [['FIRST50','50% off up to ₹100'],['HUNGRY20','20% off above ₹399'],['FREEDEL','Free delivery above ₹299'],['SAVE100','₹100 off above ₹599']].forEach(c => { %>
+          <div class="coupon-chip" onclick="document.getElementById('couponInput').value='<%= c[0] %>'">
+            <code><%= c[0] %></code> <span><%= c[1] %></span>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+let currentDiscount = 0;
+let freeDelivery = false;
+const subtotal = <%= subtotal %>;
+
+function applyCoupon() {
+  const code = document.getElementById('couponInput').value.trim();
+  if (!code) return;
+  fetch('/cart/coupon', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code, subtotal })
+  }).then(r => r.json()).then(data => {
+    const msg = document.getElementById('couponMsg');
+    msg.textContent = data.msg;
+    msg.className = 'coupon-msg ' + (data.success ? 'success' : 'error');
+    if (data.success) {
+      currentDiscount = data.discount || 0;
+      freeDelivery = data.type === 'free_delivery';
+      updateTotals();
+    }
+  });
+}
+
+function updateTotals() {
+  const delivery = freeDelivery ? 0 : (subtotal >= 299 ? 0 : 40);
+  const tax = Math.round(subtotal * 0.05);
+  const total = subtotal - currentDiscount + delivery + tax;
+  document.getElementById('csDelivery').textContent = delivery === 0 ? 'FREE' : `₹${delivery}`;
+  document.getElementById('csTax').textContent = `₹${tax}`;
+  if (currentDiscount > 0) {
+    document.getElementById('discountRow').classList.remove('hidden');
+    document.getElementById('csDiscount').textContent = `-₹${currentDiscount}`;
+  }
+  document.getElementById('csTotal').textContent = `₹${Math.max(0, total).toFixed(0)}`;
+  // Update checkout link with discount info
+  const btn = document.getElementById('checkoutBtn');
+  btn.href = `/checkout?discount=${currentDiscount}&freeDelivery=${freeDelivery}&coupon=${document.getElementById('couponInput').value}`;
+}
+
+function clearCart() {
+  if (!confirm('Clear your entire cart?')) return;
+  fetch('/cart/clear', { method: 'POST' }).then(() => location.reload());
+}
+
+// Initialize totals
+updateTotals();
+</script>

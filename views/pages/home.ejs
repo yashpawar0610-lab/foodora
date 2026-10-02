@@ -1,0 +1,227 @@
+<!-- HERO SECTION -->
+<section class="hero-section">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><i class="ri-fire-fill"></i> 50% OFF on first order — Use FIRST50</div>
+    <h1 class="hero-title">Craving Something <span class="hero-highlight">Delicious?</span></h1>
+    <p class="hero-subtitle">Discover restaurants, explore cuisines and get your favorite food delivered to your door.</p>
+
+    <!-- Main Search Bar -->
+    <div class="hero-search-wrap">
+      <div class="hero-search-box">
+        <div class="hsi location-part" onclick="openLocationModal()">
+          <i class="ri-map-pin-2-fill"></i>
+          <span id="heroLocation"><%= userLocation.city || 'Set Location' %></span>
+          <i class="ri-arrow-down-s-line"></i>
+        </div>
+        <div class="hsi-divider"></div>
+        <div class="hsi search-part">
+          <i class="ri-search-line"></i>
+          <input type="text" id="heroSearch" placeholder="Search for dishes, restaurants or cuisines..." autocomplete="off">
+          <div class="search-suggestions" id="heroSuggestions"></div>
+        </div>
+        <button class="hero-search-btn" onclick="doHeroSearch()">Search</button>
+      </div>
+    </div>
+
+    <div class="hero-cta-wrap">
+      <a href="/restaurants" class="hero-btn-primary"><i class="ri-restaurant-2-line"></i> Order Food</a>
+      <a href="/restaurants" class="hero-btn-secondary"><i class="ri-compass-3-line"></i> Explore Restaurants</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat"><span>20+</span><p>Restaurants</p></div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat"><span>30 min</span><p>Avg Delivery</p></div>
+      <div class="hero-stat-divider"></div>
+      <div class="hero-stat"><span>4.5★</span><p>Avg Rating</p></div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="hero-food-cards">
+      <div class="hfc hfc-1">
+        <img src="https://images.unsplash.com/photo-1563379091339-03246963d96e?w=300&q=80" alt="Biryani">
+        <div class="hfc-label">🍛 Biryani</div>
+      </div>
+      <div class="hfc hfc-2">
+        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&q=80" alt="Burger">
+        <div class="hfc-label">🍔 Burger</div>
+      </div>
+      <div class="hfc hfc-3">
+        <img src="https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=300&q=80" alt="Pizza">
+        <div class="hfc-label">🍕 Pizza</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section categories-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">What Are You Craving?</h2>
+      <p class="section-sub">Tap a category to find restaurants near you</p>
+    </div>
+    <div class="categories-scroll">
+      <% categories.forEach(cat => { %>
+      <a href="/category/<%= cat.slug %>" class="category-pill">
+        <div class="cat-img-wrap">
+          <img src="<%= cat.image %>" alt="<%= cat.name %>" loading="lazy">
+        </div>
+        <span><%= cat.name %></span>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- OFFERS BANNER -->
+<section class="offers-banner-section">
+  <div class="container">
+    <div class="offers-banner-grid">
+      <% offers.forEach((offer, i) => { %>
+      <div class="offer-banner-card offer-color-<%= i % 4 %>">
+        <div class="obc-icon"><i class="ri-coupon-3-fill"></i></div>
+        <div class="obc-info">
+          <p class="obc-desc"><%= offer.desc %></p>
+          <div class="obc-code-row">
+            <code class="obc-code"><%= offer.code %></code>
+            <button onclick="copyCode('<%= offer.code %>')" class="obc-copy-btn">Copy</button>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED RESTAURANTS -->
+<% if (featuredRestaurants.length > 0) { %>
+<section class="section restaurants-section">
+  <div class="container">
+    <div class="section-header-row">
+      <div>
+        <h2 class="section-title">⭐ Featured Restaurants</h2>
+        <p class="section-sub">Handpicked for you today</p>
+      </div>
+      <a href="/restaurants" class="see-all-link">See All <i class="ri-arrow-right-line"></i></a>
+    </div>
+    <div class="restaurant-grid">
+      <% featuredRestaurants.forEach(r => { %>
+        <%- include('../partials/restaurant-card', { r }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- TOP RATED -->
+<% if (topRated.length > 0) { %>
+<section class="section restaurants-section alt-bg">
+  <div class="container">
+    <div class="section-header-row">
+      <div>
+        <h2 class="section-title">🏆 Top Rated Near You</h2>
+        <p class="section-sub">Restaurants with highest ratings</p>
+      </div>
+      <a href="/restaurants?sort=rating" class="see-all-link">See All <i class="ri-arrow-right-line"></i></a>
+    </div>
+    <div class="restaurant-grid">
+      <% topRated.forEach(r => { %>
+        <%- include('../partials/restaurant-card', { r }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- ALL RESTAURANTS -->
+<section class="section restaurants-section">
+  <div class="container">
+    <div class="section-header-row">
+      <div>
+        <h2 class="section-title">🍽️ All Restaurants</h2>
+        <p class="section-sub">Every restaurant on FOODORA</p>
+      </div>
+      <a href="/restaurants" class="see-all-link">View All <i class="ri-arrow-right-line"></i></a>
+    </div>
+    <div class="restaurant-grid">
+      <% allRestaurants.forEach(r => { %>
+        <%- include('../partials/restaurant-card', { r }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- WHY FOODORA -->
+<section class="why-foodora-section">
+  <div class="container">
+    <h2 class="section-title" style="text-align:center;margin-bottom:3rem;">Why Choose FOODORA?</h2>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon" style="background:linear-gradient(135deg,#FF4500,#FF8C00)"><i class="ri-flashlight-fill"></i></div>
+        <h3>Lightning Fast Delivery</h3>
+        <p>Most orders delivered in under 40 minutes. Track your food in real time.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" style="background:linear-gradient(135deg,#4776E6,#8E54E9)"><i class="ri-shield-check-fill"></i></div>
+        <h3>Safe & Secure Payments</h3>
+        <p>Pay with UPI, card, or cash on delivery. 100% secure transactions.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" style="background:linear-gradient(135deg,#11998e,#38ef7d)"><i class="ri-star-fill"></i></div>
+        <h3>Verified Restaurants</h3>
+        <p>All restaurants are quality verified and have hygiene certifications.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" style="background:linear-gradient(135deg,#f857a6,#ff5858)"><i class="ri-customer-service-2-fill"></i></div>
+        <h3>24/7 Support</h3>
+        <p>Our dedicated support team is always there when you need help.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function doHeroSearch() {
+  const q = document.getElementById('heroSearch').value.trim();
+  if (q) window.location.href = `/search?q=${encodeURIComponent(q)}`;
+  else window.location.href = '/restaurants';
+}
+document.getElementById('heroSearch').addEventListener('keypress', e => {
+  if (e.key === 'Enter') doHeroSearch();
+});
+
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => {
+    showToast(`Code "${code}" copied!`, 'success');
+  });
+}
+
+// Hero search suggestions
+const heroSearch = document.getElementById('heroSearch');
+const heroSugg = document.getElementById('heroSuggestions');
+let heroTimer;
+if (heroSearch) {
+  heroSearch.addEventListener('input', () => {
+    clearTimeout(heroTimer);
+    const q = heroSearch.value.trim();
+    if (q.length < 2) { heroSugg.classList.remove('active'); return; }
+    heroTimer = setTimeout(async () => {
+      const data = await fetch(`/api/search?q=${encodeURIComponent(q)}`).then(r => r.json());
+      if (data.length === 0) { heroSugg.classList.remove('active'); return; }
+      heroSugg.innerHTML = data.map(s => `
+        <a href="/restaurant/${s.id}" class="sugg-item">
+          <i class="ri-store-2-line"></i>
+          <div><strong>${s.name}</strong><span>${s.sub}</span></div>
+          <span class="sugg-rating">⭐ ${s.rating}</span>
+        </a>`).join('');
+      heroSugg.classList.add('active');
+    }, 350);
+  });
+  document.addEventListener('click', e => {
+    if (!heroSearch.contains(e.target)) heroSugg.classList.remove('active');
+  });
+}
+</script>

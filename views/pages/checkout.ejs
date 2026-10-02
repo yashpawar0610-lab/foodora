@@ -1,0 +1,171 @@
+<div class="page-checkout">
+  <div class="container">
+    <h1 class="page-title"><i class="ri-secure-payment-line"></i> Checkout</h1>
+
+    <form action="/order/place" method="POST" class="checkout-form" id="checkoutForm">
+      <div class="checkout-layout">
+        <!-- Left: Delivery & Payment -->
+        <div class="checkout-left">
+
+          <!-- Delivery Address -->
+          <div class="checkout-card">
+            <h3 class="cc-title"><i class="ri-map-pin-line"></i> Delivery Address</h3>
+
+            <% if (user && user.addresses && user.addresses.length > 0) { %>
+            <!-- Saved Addresses -->
+            <div class="saved-addresses">
+              <% user.addresses.forEach((addr, i) => { %>
+              <label class="saved-addr-label">
+                <input type="radio" name="savedAddr" value="<%= i %>" onchange="fillAddress(this)">
+                <div class="sad-info">
+                  <span class="sad-label"><%= addr.label || 'Address' %></span>
+                  <p><%= addr.street %>, <%= addr.area %>, <%= addr.city %> - <%= addr.pincode %></p>
+                </div>
+              </label>
+              <% }) %>
+              <label class="saved-addr-label">
+                <input type="radio" name="savedAddr" value="new" onchange="toggleNewAddress(true)">
+                <div class="sad-info"><span class="sad-label">+ Add New Address</span></div>
+              </label>
+            </div>
+            <% } %>
+
+            <div id="newAddressForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Street Address *</label>
+                  <input type="text" name="street" id="streetInput" placeholder="House No., Street, Locality" required>
+                </div>
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Area / Locality</label>
+                  <input type="text" name="area" id="areaInput" placeholder="Area / Sector">
+                </div>
+                <div class="form-group">
+                  <label>City *</label>
+                  <input type="text" name="city" id="cityInput" placeholder="City" value="<%= userLocation.city || 'Pune' %>" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Pincode *</label>
+                <input type="text" name="pincode" id="pincodeInput" placeholder="6-digit pincode" pattern="[0-9]{6}" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="checkout-card">
+            <h3 class="cc-title"><i class="ri-bank-card-line"></i> Payment Method</h3>
+            <div class="payment-options">
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="Cash on Delivery" checked>
+                <div class="po-box">
+                  <i class="ri-money-dollar-circle-line"></i>
+                  <div><strong>Cash on Delivery</strong><p>Pay when your order arrives</p></div>
+                </div>
+              </label>
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="UPI">
+                <div class="po-box">
+                  <i class="ri-qr-code-line"></i>
+                  <div><strong>UPI / Net Banking</strong><p>Pay via UPI apps</p></div>
+                </div>
+              </label>
+              <label class="payment-option">
+                <input type="radio" name="paymentMethod" value="Card">
+                <div class="po-box">
+                  <i class="ri-bank-card-2-line"></i>
+                  <div><strong>Debit / Credit Card</strong><p>Visa, Mastercard, RuPay</p></div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Order Items Summary -->
+          <div class="checkout-card">
+            <h3 class="cc-title"><i class="ri-list-check"></i> Order Items (<%= cart.length %>)</h3>
+            <div class="checkout-items-list">
+              <% cart.forEach(item => { %>
+              <div class="cil-row">
+                <div class="cil-veg-dot <%= item.isVeg ? 'veg' : 'non-veg' %>"></div>
+                <span class="cil-name"><%= item.name %></span>
+                <span class="cil-qty">× <%= item.qty %></span>
+                <span class="cil-price">₹<%= (item.price * item.qty).toFixed(0) %></span>
+              </div>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Bill Summary -->
+        <div class="checkout-right">
+          <div class="bill-summary-card">
+            <h3><i class="ri-bill-line"></i> Bill Summary</h3>
+            <div class="bs-row"><span>Item Total</span><span>₹<%= subtotal %></span></div>
+            <div class="bs-row"><span>Delivery Fee</span>
+              <span><%= deliveryFee === 0 ? '<span style="color:var(--success)">FREE</span>' : '₹' + deliveryFee %></span>
+            </div>
+            <div class="bs-row"><span>Taxes (5%)</span><span>₹<%= taxes %></span></div>
+
+            <% const qDiscount = parseInt(query.discount) || 0; %>
+            <% if (qDiscount > 0) { %>
+            <div class="bs-row"><span>Discount</span><span style="color:var(--success)">-₹<%= qDiscount %></span></div>
+            <input type="hidden" name="discount" value="<%= qDiscount %>">
+            <input type="hidden" name="couponCode" value="<%= query.coupon || '' %>">
+            <% } else { %>
+            <input type="hidden" name="discount" value="0">
+            <% } %>
+
+            <% const qFreeDelivery = query.freeDelivery === 'true'; %>
+            <input type="hidden" name="deliveryFee" value="<%= qFreeDelivery ? 0 : deliveryFee %>">
+
+            <div class="bs-divider"></div>
+            <div class="bs-row bs-total-row">
+              <span>Grand Total</span>
+              <span>₹<%= subtotal + (qFreeDelivery ? 0 : deliveryFee) + taxes - qDiscount %></span>
+            </div>
+
+            <div class="estimated-delivery-info">
+              <i class="ri-time-line"></i>
+              Estimated delivery in <strong>35-45 minutes</strong>
+            </div>
+
+            <button type="submit" class="btn-place-order" id="placeOrderBtn">
+              <i class="ri-check-double-line"></i> Place Order
+            </button>
+
+            <p class="checkout-security-note">
+              <i class="ri-shield-check-line"></i> Your information is safe and secure
+            </p>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function toggleNewAddress(show) {
+  document.getElementById('newAddressForm').style.display = show ? 'block' : 'none';
+}
+
+function fillAddress(radio) {
+  if (radio.value === 'new') { toggleNewAddress(true); return; }
+  const addresses = <%- JSON.stringify((user && user.addresses) ? user.addresses : []) %>;
+  const addr = addresses[parseInt(radio.value)];
+  if (addr) {
+    document.getElementById('streetInput').value = addr.street || '';
+    document.getElementById('areaInput').value = addr.area || '';
+    document.getElementById('cityInput').value = addr.city || '';
+    document.getElementById('pincodeInput').value = addr.pincode || '';
+    toggleNewAddress(true);
+  }
+}
+
+// Prevent double-submit
+document.getElementById('checkoutForm').addEventListener('submit', () => {
+  document.getElementById('placeOrderBtn').disabled = true;
+  document.getElementById('placeOrderBtn').textContent = 'Placing Order...';
+});
+</script>

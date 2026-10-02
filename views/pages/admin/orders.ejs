@@ -1,0 +1,80 @@
+<div class="admin-layout">
+  <div class="container admin-container">
+    <div class="admin-header-flex">
+      <div>
+        <h1 class="admin-title"><i class="ri-shopping-bag-line"></i> Manage Orders</h1>
+        <p class="admin-subtitle">Live order monitor, status controls and customer details</p>
+      </div>
+      <div class="admin-nav-pills">
+        <a href="/admin" class="admin-pill"><i class="ri-dashboard-line"></i> Overview</a>
+        <a href="/admin/restaurants" class="admin-pill"><i class="ri-store-2-line"></i> Restaurants</a>
+        <a href="/admin/orders" class="admin-pill active"><i class="ri-shopping-bag-line"></i> Orders</a>
+        <a href="/admin/users" class="admin-pill"><i class="ri-group-line"></i> Users</a>
+        <a href="/admin/reviews" class="admin-pill"><i class="ri-star-line"></i> Reviews</a>
+      </div>
+    </div>
+
+    <!-- Filter by Status bar -->
+    <div class="admin-filter-bar">
+      <span>Filter Status:</span>
+      <a href="/admin/orders" class="filter-chip <%= !statusFilter ? 'active' : '' %>">All</a>
+      <% ['Placed', 'Confirmed', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered', 'Cancelled'].forEach(st => { %>
+        <a href="/admin/orders?status=<%= encodeURIComponent(st) %>" class="filter-chip <%= statusFilter === st ? 'active' : '' %>"><%= st %></a>
+      <% }) %>
+    </div>
+
+    <div class="admin-card">
+      <div class="table-responsive">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Restaurant</th>
+              <th>Items Ordered</th>
+              <th>Amount</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Update Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% orders.forEach(o => { %>
+            <tr>
+              <td><strong>#<%= o.orderNumber %></strong><div class="text-muted"><%= new Date(o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) %></div></td>
+              <td>
+                <strong><%= o.user ? o.user.name : 'Guest' %></strong>
+                <div class="text-muted"><%= o.user ? o.user.phone : '' %></div>
+              </td>
+              <td><%= o.restaurant ? o.restaurant.name : 'Unknown' %></td>
+              <td>
+                <div class="order-items-compact">
+                  <%= o.items.map(i => `${i.name} (x${i.qty})`).join(', ') %>
+                </div>
+              </td>
+              <td><strong>₹<%= o.totalAmount.toFixed(0) %></strong></td>
+              <td><span class="badge-payment"><%= o.paymentMethod %></span></td>
+              <td>
+                <span class="status-badge status-<%= o.orderStatus.toLowerCase().replace(/\s+/g, '-') %>" id="status-badge-<%= o._id %>">
+                  <%= o.orderStatus %>
+                </span>
+              </td>
+              <td>
+                <select class="admin-status-select" onchange="quickUpdateOrderStatus('<%= o._id %>', this.value)">
+                  <% ['Placed', 'Confirmed', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered', 'Cancelled'].forEach(st => { %>
+                    <option value="<%= st %>" <%= o.orderStatus === st ? 'selected' : '' %>><%= st %></option>
+                  <% }) %>
+                </select>
+              </td>
+              <td>
+                <a href="/order/track/<%= o._id %>" class="btn-action-sm" target="_blank"><i class="ri-compass-3-line"></i> Live Track</a>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

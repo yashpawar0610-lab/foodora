@@ -1,0 +1,67 @@
+<div class="admin-layout">
+  <div class="container admin-container">
+    <div class="admin-header-flex">
+      <div>
+        <h1 class="admin-title"><i class="ri-store-2-line"></i> Manage Restaurants</h1>
+        <p class="admin-subtitle">Total: <%= restaurants.length %> restaurants on platform</p>
+      </div>
+      <div class="admin-nav-pills">
+        <a href="/admin" class="admin-pill"><i class="ri-dashboard-line"></i> Overview</a>
+        <a href="/admin/restaurants" class="admin-pill active"><i class="ri-store-2-line"></i> Restaurants</a>
+        <a href="/admin/orders" class="admin-pill"><i class="ri-shopping-bag-line"></i> Orders</a>
+        <a href="/admin/users" class="admin-pill"><i class="ri-group-line"></i> Users</a>
+        <a href="/admin/reviews" class="admin-pill"><i class="ri-star-line"></i> Reviews</a>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="table-responsive">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Restaurant</th>
+              <th>City / Area</th>
+              <th>Cuisines</th>
+              <th>Rating</th>
+              <th>Price For Two</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% restaurants.forEach(r => { %>
+            <tr>
+              <td>
+                <div class="table-user-cell">
+                  <img src="<%= r.coverImage %>" alt="<%= r.name %>" class="avatar-sm" onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=80&q=80'">
+                  <div>
+                    <strong><%= r.name %></strong>
+                    <div class="text-muted"><%= r.menu ? r.menu.length : 0 %> dishes</div>
+                  </div>
+                </div>
+              </td>
+              <td><%= r.area %>, <%= r.city %></td>
+              <td><%= r.cuisine.slice(0, 3).join(', ') %></td>
+              <td><span class="badge-star"><i class="ri-star-fill"></i> <%= r.rating %></span> (<%= r.totalReviews %>)</td>
+              <td>₹<%= r.priceForTwo %></td>
+              <td>
+                <span class="status-badge <%= r.isActive ? 'status-delivered' : 'status-cancelled' %>" id="r-status-<%= r._id %>">
+                  <%= r.isActive ? 'Active' : 'Inactive' %>
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons-group">
+                  <a href="/restaurant/<%= r._id %>" class="btn-action-sm" target="_blank"><i class="ri-external-link-line"></i> View</a>
+                  <button class="btn-action-sm <%= r.isActive ? 'btn-danger' : 'btn-success' %>" onclick="toggleRestaurantStatus('<%= r._id %>')">
+                    <%= r.isActive ? 'Deactivate' : 'Activate' %>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

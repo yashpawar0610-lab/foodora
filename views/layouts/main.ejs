@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'FOODORA - Good Food. Great Moments.' %></title>
+  <meta name="description" content="FOODORA - Discover restaurants, explore cuisines and get your favorite food delivered fast.">
+  <meta name="theme-color" content="#FF4500">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/header.css">
+</head>
+<body>
+
+  <!-- Flash Message -->
+  <% if (locals.flash) { %>
+  <div class="flash-message flash-<%= flash.type %>" id="flashMsg">
+    <i class="ri-<%= flash.type === 'success' ? 'checkbox-circle' : 'error-warning' %>-line"></i>
+    <%= flash.msg %>
+    <button onclick="this.parentElement.remove()"><i class="ri-close-line"></i></button>
+  </div>
+  <% } %>
+
+  <!-- Header -->
+  <%- include('../partials/header') %>
+
+  <!-- Main Content -->
+  <main id="main-content">
+    <%- body %>
+  </main>
+
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-sidebar-header">
+      <h3><i class="ri-shopping-bag-line"></i> Your Cart <span class="cart-badge" id="sidebarCartCount"><%= cartCount %></span></h3>
+      <button class="cart-sidebar-close" id="cartSidebarClose"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="cart-sidebar-body" id="cartSidebarBody">
+      <% if (cart.length === 0) { %>
+      <div class="cart-empty-state">
+        <i class="ri-shopping-bag-2-line"></i>
+        <p>Your cart is empty</p>
+        <a href="/restaurants" class="btn-primary-sm">Browse Restaurants</a>
+      </div>
+      <% } else { %>
+        <div class="cart-restaurant-info">
+          <i class="ri-store-2-line"></i> <%= cart[0].restaurantName %>
+        </div>
+        <% cart.forEach(item => { %>
+        <div class="cart-sidebar-item">
+          <div class="csi-veg-dot <%= item.isVeg ? 'veg' : 'non-veg' %>"></div>
+          <div class="csi-info">
+            <p class="csi-name"><%= item.name %></p>
+            <p class="csi-price">₹<%= (item.price * item.qty).toFixed(0) %></p>
+          </div>
+          <div class="csi-qty">
+            <button class="qty-btn" onclick="updateCartQty('<%= item.key %>', <%= item.qty - 1 %>)">−</button>
+            <span><%= item.qty %></span>
+            <button class="qty-btn" onclick="updateCartQty('<%= item.key %>', <%= item.qty + 1 %>)">+</button>
+          </div>
+        </div>
+        <% }) %>
+      <% } %>
+    </div>
+    <% if (cart.length > 0) { %>
+    <div class="cart-sidebar-footer">
+      <div class="cart-total-row">
+        <span>Total</span>
+        <span>₹<%= cartTotal.toFixed(0) %></span>
+      </div>
+      <a href="/checkout" class="btn-checkout-full">Proceed to Checkout →</a>
+    </div>
+    <% } %>
+  </div>
+  <div class="cart-overlay" id="cartOverlay"></div>
+
+  <!-- Item Customization Modal -->
+  <div class="modal-backdrop" id="itemModal">
+    <div class="modal-box" id="itemModalBox">
+      <button class="modal-close" id="itemModalClose"><i class="ri-close-line"></i></button>
+      <div id="itemModalContent"></div>
+    </div>
+  </div>
+
+  <!-- Location Modal -->
+  <div class="modal-backdrop" id="locationModal">
+    <div class="modal-box" style="max-width:450px;">
+      <button class="modal-close" onclick="closeLocationModal()"><i class="ri-close-line"></i></button>
+      <h3 style="font-size:1.4rem;font-weight:700;margin-bottom:1.2rem;"><i class="ri-map-pin-line" style="color:var(--primary)"></i> Set Delivery Location</h3>
+      <form id="locationForm">
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" id="locCity" placeholder="e.g. Pune" value="<%= userLocation.city %>">
+        </div>
+        <div class="form-group">
+          <label>Area / Locality</label>
+          <input type="text" id="locArea" placeholder="e.g. Koregaon Park" value="<%= userLocation.area %>">
+        </div>
+        <div class="form-group">
+          <label>Pincode</label>
+          <input type="text" id="locPincode" placeholder="e.g. 411001" value="<%= userLocation.pincode %>">
+        </div>
+        <button type="button" class="btn-primary-full" onclick="saveLocation()">Save Location</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/main.js"></script>
+  <script src="/js/cart.js"></script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<div class="page-order-success">
+  <div class="container">
+    <div class="success-card">
+      <div class="success-animation">
+        <div class="success-circle">
+          <i class="ri-checkbox-circle-fill"></i>
+        </div>
+      </div>
+      <h1>Order Placed Successfully! 🎉</h1>
+      <p class="success-subtitle">Your delicious food is on its way!</p>
+
+      <div class="order-number-badge">
+        Order # <strong><%= order.orderNumber %></strong>
+      </div>
+
+      <div class="order-details-grid">
+        <div class="odg-item">
+          <i class="ri-store-2-line"></i>
+          <div>
+            <p class="odg-label">Restaurant</p>
+            <p class="odg-val"><%= order.restaurantName %></p>
+          </div>
+        </div>
+        <div class="odg-item">
+          <i class="ri-money-rupee-circle-line"></i>
+          <div>
+            <p class="odg-label">Amount Paid</p>
+            <p class="odg-val">₹<%= order.totalAmount.toFixed(0) %></p>
+          </div>
+        </div>
+        <div class="odg-item">
+          <i class="ri-bank-card-line"></i>
+          <div>
+            <p class="odg-label">Payment</p>
+            <p class="odg-val"><%= order.paymentMethod %></p>
+          </div>
+        </div>
+        <div class="odg-item">
+          <i class="ri-time-line"></i>
+          <div>
+            <p class="odg-label">Estimated Delivery</p>
+            <p class="odg-val">35 – 45 minutes</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="success-items">
+        <h3>Items Ordered</h3>
+        <% order.items.forEach(item => { %>
+        <div class="si-row">
+          <div class="si-veg-dot <%= item.isVeg ? 'veg' : 'non-veg' %>"></div>
+          <span class="si-name"><%= item.name %></span>
+          <span class="si-qty">× <%= item.qty %></span>
+          <span class="si-price">₹<%= (item.price * item.qty).toFixed(0) %></span>
+        </div>
+        <% }) %>
+      </div>
+
+      <!-- Delivery Address -->
+      <div class="success-address">
+        <i class="ri-map-pin-line"></i>
+        <p><%= order.deliveryAddress.street %>, <%= order.deliveryAddress.area ? order.deliveryAddress.area + ', ' : '' %><%= order.deliveryAddress.city %> - <%= order.deliveryAddress.pincode %></p>
+      </div>
+
+      <!-- Order Tracker -->
+      <div class="order-tracker">
+        <% const statusSteps = ['Placed','Confirmed','Preparing','Out for Delivery','Delivered']; %>
+        <% const currentIdx = statusSteps.indexOf(order.orderStatus === 'Ready' ? 'Preparing' : order.orderStatus); %>
+        <% statusSteps.forEach((step, i) => { %>
+        <div class="tracker-step <%= i <= currentIdx ? 'done' : '' %> <%= i === currentIdx ? 'active' : '' %>">
+          <div class="ts-dot"><i class="ri-check-line"></i></div>
+          <p><%= step %></p>
+        </div>
+        <% if (i < statusSteps.length - 1) { %><div class="tracker-line <%= i < currentIdx ? 'done' : '' %>"></div><% } %>
+        <% }) %>
+      </div>
+
+      <div class="success-actions">
+        <a href="/order/<%= order._id %>/track" class="btn-track-order">
+          <i class="ri-map-2-line"></i> Track Order
+        </a>
+        <a href="/restaurants" class="btn-continue-ordering">
+          <i class="ri-restaurant-2-line"></i> Order More Food
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

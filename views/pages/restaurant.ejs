@@ -1,0 +1,207 @@
+<div class="restaurant-detail-page" data-restaurant-id="<%= restaurant._id %>" data-restaurant-name="<%= restaurant.name %>">
+
+  <!-- Cover Image -->
+  <div class="restaurant-cover">
+    <img src="<%= restaurant.coverImage %>" alt="<%= restaurant.name %>" class="rc-cover-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&q=80'">
+    <div class="rc-cover-overlay"></div>
+    <div class="rc-cover-content container">
+      <div class="rc-cover-info">
+        <div class="rc-logo-wrap">
+          <img src="<%= restaurant.logo %>" alt="<%= restaurant.name %> logo" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'">
+        </div>
+        <div>
+          <h1 class="rc-restaurant-name"><%= restaurant.name %></h1>
+          <p class="rc-cuisine-text"><%= restaurant.cuisine.join(' • ') %></p>
+          <div class="rc-meta-row">
+            <span class="rc-rating-badge"><i class="ri-star-fill"></i> <%= restaurant.rating.toFixed(1) %> (<%= restaurant.reviewCount %> reviews)</span>
+            <span class="rc-meta-chip"><i class="ri-time-line"></i> <%= restaurant.deliveryTime %></span>
+            <span class="rc-meta-chip"><i class="ri-bike-line"></i> ₹<%= restaurant.deliveryFee %> delivery</span>
+            <span class="rc-meta-chip"><%= restaurant.priceRange %> for two</span>
+            <% if (restaurant.isVeg) { %><span class="rc-meta-chip veg-chip">🟢 Pure Veg</span><% } %>
+          </div>
+          <% if (restaurant.offer) { %>
+          <div class="rc-offer-strip"><i class="ri-percent-fill"></i> <%= restaurant.offer %></div>
+          <% } %>
+        </div>
+      </div>
+      <div class="rc-cover-actions">
+        <button class="btn-fav-large <%= isFavorited ? 'favorited' : '' %>" id="favBtn" onclick="toggleFavorite('<%= restaurant._id %>', this)">
+          <i class="ri-heart<%= isFavorited ? '-fill' : '-line' %>"></i>
+          <span id="favBtnText"><%= isFavorited ? 'Saved' : 'Save' %></span>
+        </button>
+        <button class="btn-share" onclick="shareRestaurant()"><i class="ri-share-line"></i> Share</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Bar -->
+  <div class="restaurant-info-bar">
+    <div class="container restaurant-info-inner">
+      <div class="rib-item">
+        <i class="ri-map-pin-line"></i>
+        <span><%= restaurant.address %>, <%= restaurant.city %></span>
+      </div>
+      <div class="rib-item">
+        <i class="ri-time-line"></i>
+        <span><%= restaurant.openingTime %> – <%= restaurant.closingTime %></span>
+      </div>
+      <div class="rib-item">
+        <div class="status-dot <%= restaurant.isOpen ? 'open' : 'closed' %>"></div>
+        <span><%= restaurant.isOpen ? 'Open Now' : 'Currently Closed' %></span>
+      </div>
+      <div class="rib-item">
+        <i class="ri-money-rupee-circle-line"></i>
+        <span>Min. order ₹<%= restaurant.minOrder %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="restaurant-main-content container">
+    <!-- Menu Sidebar (Category Nav) -->
+    <nav class="menu-category-nav" id="menuCategoryNav">
+      <div class="mcn-header"><i class="ri-menu-2-line"></i> Menu</div>
+      <% Object.keys(menuByCategory).forEach(cat => { %>
+      <a href="#cat-<%= cat.replace(/\s+/g, '-').toLowerCase() %>" class="mcn-link"><%= cat %></a>
+      <% }) %>
+    </nav>
+
+    <!-- Menu Items -->
+    <div class="menu-content" id="menuContent">
+      <% if (Object.keys(menuByCategory).length === 0) { %>
+      <div class="empty-state"><i class="ri-restaurant-2-line"></i><p>Menu coming soon</p></div>
+      <% } else { %>
+        <% Object.entries(menuByCategory).forEach(([cat, items]) => { %>
+        <div class="menu-category-section" id="cat-<%= cat.replace(/\s+/g, '-').toLowerCase() %>">
+          <h2 class="menu-cat-title"><%= cat %> <span class="menu-cat-count">(<%= items.length %>)</span></h2>
+          <div class="menu-items-list">
+            <% items.forEach(item => { %>
+            <% if (item.isAvailable) { %>
+            <div class="menu-item-card" id="item-<%= item._id %>">
+              <div class="mic-info">
+                <div class="mic-veg-row">
+                  <div class="veg-indicator <%= item.isVeg ? 'veg' : 'nonveg' %>">
+                    <div class="vi-dot"></div>
+                  </div>
+                  <% if (item.isBestseller) { %><span class="bestseller-tag"><i class="ri-fire-fill"></i> Bestseller</span><% } %>
+                </div>
+                <h3 class="mic-name"><%= item.name %></h3>
+                <p class="mic-desc"><%= item.description %></p>
+                <div class="mic-price-row">
+                  <span class="mic-price">₹<%= item.price %></span>
+                  <% if (item.rating > 0) { %><span class="mic-rating"><i class="ri-star-fill"></i> <%= item.rating %></span><% } %>
+                </div>
+              </div>
+              <div class="mic-img-col">
+                <div class="mic-img-wrap">
+                  <img src="<%= item.image %>" alt="<%= item.name %>" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80'">
+                </div>
+                <button class="mic-add-btn" onclick="openItemModal('<%= restaurant._id %>', '<%= item._id %>')">
+                  <i class="ri-add-line"></i> ADD
+                </button>
+              </div>
+            </div>
+            <% } %> 
+            <% }) %>
+          </div>
+        </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <section class="section reviews-section">
+    <div class="container">
+      <h2 class="section-title">Reviews (<%= reviews.length %>)</h2>
+
+      <% if (reviews.length > 0) { %>
+      <div class="reviews-grid">
+        <% reviews.forEach(rv => { %>
+        <div class="review-card">
+          <div class="rev-header">
+            <div class="rev-avatar"><%= rv.user.name.charAt(0).toUpperCase() %></div>
+            <div>
+              <p class="rev-name"><%= rv.user.name %></p>
+              <div class="rev-stars">
+                <% for (let s=1; s<=5; s++) { %><i class="ri-star-<%= s <= rv.rating ? 'fill' : 'line' %>"></i><% } %>
+              </div>
+            </div>
+            <% if (rv.isVerified) { %><span class="verified-badge"><i class="ri-shield-check-fill"></i> Verified</span><% } %>
+          </div>
+          <p class="rev-text"><%= rv.review %></p>
+          <p class="rev-date"><%= new Date(rv.createdAt).toLocaleDateString('en-IN', {year:'numeric',month:'short',day:'numeric'}) %></p>
+        </div>
+        <% }) %>
+      </div>
+      <% } else { %>
+      <p style="opacity:0.6;">No reviews yet. Be the first to review!</p>
+      <% } %>
+
+      <!-- Submit Review (logged in users) -->
+      <% if (user) { %>
+      <div class="review-form-wrap">
+        <h3>Write a Review</h3>
+        <form action="/restaurant/<%= restaurant._id %>/review" method="POST" class="review-form">
+          <div class="star-rating-input" id="starRatingInput">
+            <% for (let s=5; s>=1; s--) { %>
+            <input type="radio" name="rating" id="star<%= s %>" value="<%= s %>">
+            <label for="star<%= s %>"><i class="ri-star-fill"></i></label>
+            <% } %>
+          </div>
+          <textarea name="review" placeholder="Share your experience..." rows="3"></textarea>
+          <div class="review-sub-ratings">
+            <label>Food: <select name="foodRating"><% for(let i=5;i>=1;i--){ %><option value="<%= i %>"><%= i %> ⭐</option><% } %></select></label>
+            <label>Delivery: <select name="deliveryRating"><% for(let i=5;i>=1;i--){ %><option value="<%= i %>"><%= i %> ⭐</option><% } %></select></label>
+          </div>
+          <button type="submit" class="btn-submit-review">Submit Review</button>
+        </form>
+      </div>
+      <% } else { %>
+      <p style="margin-top:1.5rem;"><a href="/login" style="color:var(--primary);font-weight:600;">Login</a> to write a review.</p>
+      <% } %>
+    </div>
+  </section>
+</div>
+
+<!-- Sticky Add to Cart Bar (when items in cart) -->
+<% if (cart.length > 0 && cart[0].restaurantId === restaurant._id.toString()) { %>
+<div class="sticky-cart-bar" id="stickyCartBar">
+  <div class="scb-info">
+    <span class="scb-count"><%= cartCount %> item(s)</span>
+    <span class="scb-restaurant"><%= cart[0].restaurantName %></span>
+  </div>
+  <a href="/cart" class="scb-checkout-btn">View Cart & Checkout →</a>
+</div>
+<% } %>
+
+<script>
+// Menu category sticky nav
+const sections = document.querySelectorAll('.menu-category-section');
+const navLinks = document.querySelectorAll('.mcn-link');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 180) current = s.id; });
+  navLinks.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+});
+
+// Smooth scroll for menu nav
+navLinks.forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.getElementById(link.getAttribute('href').substring(1));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+function shareRestaurant() {
+  if (navigator.share) {
+    navigator.share({ title: '<%= restaurant.name %> on FOODORA', url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    showToast('Link copied!', 'success');
+  }
+}
+</script>

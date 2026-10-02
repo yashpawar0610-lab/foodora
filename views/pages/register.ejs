@@ -1,0 +1,88 @@
+<div class="auth-page">
+  <div class="auth-visual">
+    <div class="auth-visual-content">
+      <div class="auth-logo-large">🍕 FOODORA</div>
+      <h2>Join the Food Revolution.</h2>
+      <p>Discover hand-picked restaurants, get lightning-fast delivery, and unlock exclusive discounts across town.</p>
+      <div class="auth-perks">
+        <div class="perk-item"><i class="ri-fire-fill"></i> Flat 50% OFF on your 1st order</div>
+        <div class="perk-item"><i class="ri-timer-flash-fill"></i> Live real-time delivery tracking</div>
+        <div class="perk-item"><i class="ri-shield-star-fill"></i> 100% verified kitchen safety & hygiene</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-form-card">
+      <div class="auth-header">
+        <h2>Create an Account</h2>
+        <p>Already have an account? <a href="/login" class="auth-link">Sign in</a></p>
+      </div>
+
+      <% if (locals.msg) { %>
+      <div class="alert alert-error">
+        <i class="ri-error-warning-line"></i> <%= msg %>
+      </div>
+      <% } %>
+
+      <form action="/register" method="POST" class="auth-form" id="registerForm">
+        <div class="form-group">
+          <label for="name"><i class="ri-user-line"></i> Full Name</label>
+          <input type="text" id="name" name="name" placeholder="John Doe" required autofocus>
+        </div>
+
+        <div class="form-group">
+          <label for="email"><i class="ri-mail-line"></i> Email Address</label>
+          <input type="email" id="email" name="email" placeholder="john@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="phone"><i class="ri-phone-line"></i> Phone Number</label>
+          <input type="tel" id="phone" name="phone" placeholder="9876543210">
+        </div>
+
+        <div class="form-group">
+          <label for="password"><i class="ri-lock-line"></i> Password</label>
+          <div class="input-with-icon">
+            <input type="password" id="password" name="password" placeholder="At least 6 characters" minlength="6" required>
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password', this)"><i class="ri-eye-line"></i></button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><i class="ri-user-shared-line"></i> Account Type</label>
+          <div class="role-selector">
+            <label class="role-option">
+              <input type="radio" name="role" value="customer" checked>
+              <div class="role-box">
+                <i class="ri-user-smile-line"></i>
+                <div>
+                  <strong>Customer</strong>
+                  <p>Order food & track delivery</p>
+                </div>
+              </div>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="role" value="restaurant_owner">
+              <div class="role-box">
+                <i class="ri-store-3-line"></i>
+                <div>
+                  <strong>Restaurant Owner</strong>
+                  <p>List & manage your restaurant</p>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-terms">
+          <label>
+            <input type="checkbox" required checked> By signing up, you agree to FOODORA's <a href="/terms">Terms of Service</a> & <a href="/privacy">Privacy Policy</a>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-primary-full"><i class="ri-user-add-line"></i> Create Account</button>
+      </form>
+    </div>
+  </div>
+</div>

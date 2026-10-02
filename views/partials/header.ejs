@@ -1,0 +1,113 @@
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <!-- Logo -->
+    <a href="/" class="header-logo">
+      <span class="logo-icon">🍕</span>
+      <span class="logo-text">FOODORA</span>
+    </a>
+
+    <!-- Location Selector -->
+    <button class="location-btn" onclick="openLocationModal()" id="locationBtn">
+      <i class="ri-map-pin-2-fill"></i>
+      <span id="locationDisplay"><%= userLocation.city || 'Set Location' %><% if (userLocation.area) { %>, <%= userLocation.area %><% } %></span>
+      <i class="ri-arrow-down-s-line"></i>
+    </button>
+
+    <!-- Search Bar (Desktop) -->
+    <div class="header-search" id="headerSearch">
+      <i class="ri-search-line search-icon"></i>
+      <input type="text" id="searchInput" placeholder="Search restaurants, cuisines, dishes..." autocomplete="off">
+      <div class="search-suggestions" id="searchSuggestions"></div>
+    </div>
+
+    <!-- Nav Links -->
+    <nav class="header-nav" id="headerNav">
+      <a href="/" class="nav-link<% if (currentPath === '/') { %> active<% } %>">Home</a>
+      <a href="/restaurants" class="nav-link<% if (currentPath === '/restaurants') { %> active<% } %>">Restaurants</a>
+      <a href="/offers" class="nav-link<% if (currentPath === '/offers') { %> active<% } %>">
+        <i class="ri-coupon-3-line"></i> Offers
+      </a>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <!-- Search Toggle (Mobile) -->
+      <button class="icon-btn mobile-search-btn" id="mobileSearchBtn">
+        <i class="ri-search-line"></i>
+      </button>
+
+      <% if (user) { %>
+        <!-- Cart -->
+        <button class="icon-btn cart-btn" id="cartToggleBtn">
+          <i class="ri-shopping-bag-line"></i>
+          <% if (cartCount > 0) { %>
+          <span class="badge" id="cartBadge"><%= cartCount %></span>
+          <% } else { %>
+          <span class="badge hidden" id="cartBadge">0</span>
+          <% } %>
+        </button>
+
+        <!-- User Menu -->
+        <div class="user-menu-wrap">
+          <button class="user-menu-btn" id="userMenuBtn">
+            <div class="user-avatar"><%= user.name.charAt(0).toUpperCase() %></div>
+            <span class="user-name-short"><%= user.name.split(' ')[0] %></span>
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-header">
+              <div class="user-avatar-lg"><%= user.name.charAt(0).toUpperCase() %></div>
+              <div>
+                <p class="ud-name"><%= user.name %></p>
+                <p class="ud-email"><%= user.email %></p>
+              </div>
+            </div>
+            <hr>
+            <a href="/account"><i class="ri-user-line"></i> My Account</a>
+            <a href="/orders"><i class="ri-receipt-line"></i> My Orders</a>
+            <% if (user.role === 'admin') { %>
+            <a href="/admin"><i class="ri-shield-star-line"></i> Admin Dashboard</a>
+            <% } %>
+            <% if (user.role === 'restaurant_owner') { %>
+            <a href="/owner/dashboard"><i class="ri-store-2-line"></i> Restaurant Dashboard</a>
+            <% } %>
+            <hr>
+            <a href="/logout" class="logout-link"><i class="ri-logout-box-line"></i> Logout</a>
+          </div>
+        </div>
+      <% } else { %>
+        <a href="/login" class="btn-login">Login</a>
+        <a href="/register" class="btn-signup">Sign Up</a>
+      <% } %>
+
+      <!-- Hamburger -->
+      <button class="hamburger" id="hamburger">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Search Bar -->
+  <div class="mobile-search-bar" id="mobileSearchBar">
+    <div class="header-search" style="flex:1">
+      <i class="ri-search-line search-icon"></i>
+      <input type="text" id="mobileSearchInput" placeholder="Search restaurants, food...">
+    </div>
+    <button class="icon-btn" id="closeMobileSearch"><i class="ri-close-line"></i></button>
+  </div>
+
+  <!-- Mobile Nav -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="/" class="nav-link"><i class="ri-home-5-line"></i> Home</a>
+    <a href="/restaurants" class="nav-link"><i class="ri-store-2-line"></i> Restaurants</a>
+    <a href="/offers" class="nav-link"><i class="ri-coupon-3-line"></i> Offers</a>
+    <% if (user) { %>
+    <a href="/account" class="nav-link"><i class="ri-user-line"></i> My Account</a>
+    <a href="/orders" class="nav-link"><i class="ri-receipt-line"></i> My Orders</a>
+    <a href="/logout" class="nav-link"><i class="ri-logout-box-line"></i> Logout</a>
+    <% } else { %>
+    <a href="/login" class="nav-link"><i class="ri-login-box-line"></i> Login</a>
+    <a href="/register" class="nav-link"><i class="ri-user-add-line"></i> Register</a>
+    <% } %>
+  </div>
+</header>

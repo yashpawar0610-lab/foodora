@@ -1,0 +1,11 @@
+<div class="page-error">
+  <div class="container error-box">
+    <div class="error-code"><%= code || 404 %></div>
+    <h1><%= code === 404 ? 'Oops! Page Not Found' : 'Something Went Wrong' %></h1>
+    <p><%= message || 'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.' %></p>
+    <div class="error-actions">
+      <a href="/" class="btn-primary-sm"><i class="ri-home-line"></i> Back to Homepage</a>
+      <a href="/restaurants" class="btn-secondary-sm"><i class="ri-restaurant-line"></i> Explore Food</a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,65 @@
+<div class="page-search">
+  <div class="container">
+    <div class="search-header-box">
+      <h1>Search Results for "<%= query %>"</h1>
+      <p class="search-meta">
+        Found <%= results.length %> restaurants and <%= foodResults.length %> dishes matching your craving
+      </p>
+
+      <form action="/search" method="GET" class="search-inline-form">
+        <i class="ri-search-line search-icon"></i>
+        <input type="text" name="q" value="<%= query %>" placeholder="Search for restaurants, cuisines, or dishes..." required autofocus>
+        <button type="submit" class="btn-primary-sm">Search</button>
+      </form>
+    </div>
+
+    <!-- Dish Matches -->
+    <% if (foodResults && foodResults.length > 0) { %>
+    <section class="search-section">
+      <h2 class="search-subheading"><i class="ri-restaurant-line"></i> Matching Dishes (<%= foodResults.length %>)</h2>
+      <div class="food-results-grid">
+        <% foodResults.forEach(item => { %>
+        <div class="food-result-card">
+          <div class="frc-img-wrap">
+            <img src="<%= item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80' %>" alt="<%= item.name %>" loading="lazy">
+          </div>
+          <div class="frc-body">
+            <div class="frc-meta">
+              <span class="veg-badge-mini <%= item.isVeg ? 'veg' : 'non-veg' %>"></span>
+              <a href="/restaurant/<%= item.restaurantId %>" class="frc-restaurant"><i class="ri-store-2-line"></i> <%= item.restaurantName %></a>
+            </div>
+            <h3 class="frc-name"><%= item.name %></h3>
+            <p class="frc-desc"><%= item.description ? item.description.slice(0, 75) + '...' : '' %></p>
+            <div class="frc-footer">
+              <span class="frc-price">₹<%= item.price.toFixed(0) %></span>
+              <button class="btn-add-food" onclick="openItemModal('<%= item.restaurantId %>', '<%= item._id %>')">
+                <i class="ri-add-line"></i> ADD
+              </button>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- Restaurant Matches -->
+    <section class="search-section">
+      <h2 class="search-subheading"><i class="ri-store-3-line"></i> Matching Restaurants (<%= results.length %>)</h2>
+      <% if (results && results.length > 0) { %>
+        <div class="restaurants-grid">
+          <% results.forEach(r => { %>
+            <%- include('../partials/restaurant-card', { r }) %>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty-state">
+          <i class="ri-search-eye-line"></i>
+          <h3>No restaurants found for "<%= query %>"</h3>
+          <p>Try searching for popular cuisines like "Pizza", "Biryani", "Burger" or explore all restaurants.</p>
+          <a href="/restaurants" class="btn-primary-sm">Browse All Restaurants</a>
+        </div>
+      <% } %>
+    </section>
+  </div>
+</div>

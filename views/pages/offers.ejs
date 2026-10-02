@@ -1,0 +1,53 @@
+<div class="page-offers">
+  <div class="offers-hero">
+    <div class="container">
+      <span class="pill-badge"><i class="ri-percent-fill"></i> Exclusive Deals</span>
+      <h1>Best Food Deals & Coupons</h1>
+      <p>Save big on your next meal with curated promo codes and discount vouchers from top rated spots</p>
+    </div>
+  </div>
+
+  <div class="container" style="padding-top:2.5rem;padding-bottom:3rem;">
+    <!-- Coupons Grid -->
+    <h2 class="section-title"><i class="ri-coupon-3-line"></i> Available Coupon Codes</h2>
+    <div class="coupons-grid">
+      <% coupons.forEach(c => { %>
+      <div class="coupon-card">
+        <div class="coupon-left">
+          <div class="coupon-discount">
+            <% if (c.type === 'percent') { %>
+              <%= c.discount %>% OFF
+            <% } else if (c.type === 'flat') { %>
+              ₹<%= c.discount %> OFF
+            <% } else { %>
+              FREE DEL
+            <% } %>
+          </div>
+          <span class="coupon-min">Orders above ₹<%= c.minOrder %></span>
+        </div>
+        <div class="coupon-right">
+          <p class="coupon-desc"><%= c.desc %></p>
+          <div class="coupon-code-bar">
+            <span class="code-text" id="code-<%= c.code %>"><%= c.code %></span>
+            <button class="btn-copy-code" onclick="copyCouponCode('<%= c.code %>')">
+              <i class="ri-file-copy-line"></i> COPY
+            </button>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+
+    <!-- Restaurants with active offers -->
+    <% if (restaurants && restaurants.length > 0) { %>
+    <section style="margin-top: 3.5rem;">
+      <h2 class="section-title"><i class="ri-fire-line" style="color:var(--primary)"></i> Restaurants with Special Offers</h2>
+      <div class="restaurants-grid">
+        <% restaurants.forEach(r => { %>
+          <%- include('../partials/restaurant-card', { r }) %>
+        <% }) %>
+      </div>
+    </section>
+    <% } %>
+  </div>
+</div>

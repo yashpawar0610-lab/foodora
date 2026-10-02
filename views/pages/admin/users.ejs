@@ -1,0 +1,51 @@
+<div class="admin-layout">
+  <div class="container admin-container">
+    <div class="admin-header-flex">
+      <div>
+        <h1 class="admin-title"><i class="ri-group-line"></i> Registered Users</h1>
+        <p class="admin-subtitle">Total: <%= users.length %> registered accounts</p>
+      </div>
+      <div class="admin-nav-pills">
+        <a href="/admin" class="admin-pill"><i class="ri-dashboard-line"></i> Overview</a>
+        <a href="/admin/restaurants" class="admin-pill"><i class="ri-store-2-line"></i> Restaurants</a>
+        <a href="/admin/orders" class="admin-pill"><i class="ri-shopping-bag-line"></i> Orders</a>
+        <a href="/admin/users" class="admin-pill active"><i class="ri-group-line"></i> Users</a>
+        <a href="/admin/reviews" class="admin-pill"><i class="ri-star-line"></i> Reviews</a>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="table-responsive">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>City</th>
+              <th>Joined Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach(u => { %>
+            <tr>
+              <td>
+                <div class="table-user-cell">
+                  <div class="avatar-circle"><%= u.name ? u.name.charAt(0).toUpperCase() : 'U' %></div>
+                  <strong><%= u.name %></strong>
+                </div>
+              </td>
+              <td><%= u.email %></td>
+              <td><%= u.phone || '—' %></td>
+              <td><span class="badge-role"><%= u.role %></span></td>
+              <td><%= u.location ? u.location.city : 'Pune' %></td>
+              <td><%= new Date(u.createdAt).toLocaleDateString() %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

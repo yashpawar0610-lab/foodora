@@ -1,0 +1,160 @@
+<div class="page-account">
+  <div class="container">
+    <div class="account-header">
+      <div class="account-avatar-wrap">
+        <div class="account-avatar">
+          <%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %>
+        </div>
+      </div>
+      <div class="account-user-meta">
+        <h1><%= user.name %></h1>
+        <p><i class="ri-mail-line"></i> <%= user.email %> • <i class="ri-phone-line"></i> <%= user.phone || 'No phone added' %></p>
+        <span class="badge-role"><i class="ri-shield-user-line"></i> <%= user.role.replace('_', ' ').toUpperCase() %></span>
+      </div>
+    </div>
+
+    <div class="account-grid">
+      <!-- Profile Information -->
+      <div class="account-card">
+        <div class="card-header-styled">
+          <h3><i class="ri-user-settings-line"></i> Personal Profile</h3>
+        </div>
+        <form action="/account/update" method="POST" class="styled-form">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" name="name" value="<%= user.name %>" required>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" name="phone" value="<%= user.phone || '' %>" placeholder="e.g. 9876543210">
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>City</label>
+              <input type="text" name="city" value="<%= user.location ? user.location.city : 'Pune' %>">
+            </div>
+            <div class="form-group">
+              <label>Area</label>
+              <input type="text" name="area" value="<%= user.location ? user.location.area : '' %>" placeholder="Locality">
+            </div>
+            <div class="form-group">
+              <label>Pincode</label>
+              <input type="text" name="pincode" value="<%= user.location ? user.location.pincode : '' %>" placeholder="Pincode">
+            </div>
+          </div>
+          <button type="submit" class="btn-primary-sm"><i class="ri-save-line"></i> Save Profile</button>
+        </form>
+      </div>
+
+      <!-- Saved Addresses -->
+      <div class="account-card">
+        <div class="card-header-styled">
+          <h3><i class="ri-map-pin-user-line"></i> Saved Addresses</h3>
+        </div>
+        
+        <div class="saved-addresses-list">
+          <% if (user.addresses && user.addresses.length > 0) { %>
+            <% user.addresses.forEach(addr => { %>
+              <div class="address-chip">
+                <span class="addr-label"><i class="ri-home-4-line"></i> <%= addr.label %></span>
+                <p class="addr-text"><%= addr.street %>, <%= addr.area %>, <%= addr.city %> - <%= addr.pincode %></p>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p class="text-muted">No saved addresses yet. Add one below for faster checkouts!</p>
+          <% } %>
+        </div>
+
+        <h4 style="margin-top:1.5rem;font-size:1rem;color:var(--text-dark);">+ Add New Address</h4>
+        <form action="/account/address" method="POST" class="styled-form address-form">
+          <div class="form-group">
+            <label>Address Label</label>
+            <input type="text" name="label" placeholder="Home, Office, Apartment..." required>
+          </div>
+          <div class="form-group">
+            <label>Street / Flat / Building</label>
+            <input type="text" name="street" placeholder="Flat 402, Sunshine Heights" required>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>Area</label>
+              <input type="text" name="area" placeholder="Koregaon Park" required>
+            </div>
+            <div class="form-group">
+              <label>City</label>
+              <input type="text" name="city" value="<%= user.location?.city || 'Pune' %>" required>
+            </div>
+            <div class="form-group">
+              <label>Pincode</label>
+              <input type="text" name="pincode" placeholder="411001" required>
+            </div>
+          </div>
+          <button type="submit" class="btn-secondary-sm"><i class="ri-add-line"></i> Add Address</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Favorite Restaurants -->
+    <div class="account-section">
+      <h2 class="section-title"><i class="ri-heart-3-fill" style="color:var(--primary)"></i> Favorite Restaurants</h2>
+      <% if (user.favorites && user.favorites.length > 0) { %>
+        <div class="restaurants-grid">
+          <% user.favorites.forEach(r => { %>
+            <%- include('../partials/restaurant-card', { r }) %>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty-state-mini">
+          <i class="ri-heart-line"></i>
+          <p>You haven't added any favorite restaurants yet.</p>
+          <a href="/restaurants" class="btn-primary-sm">Explore Restaurants</a>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="account-section">
+      <div class="section-header-flex">
+        <h2 class="section-title"><i class="ri-time-line"></i> Recent Orders</h2>
+        <a href="/orders" class="link-styled">View All Orders →</a>
+      </div>
+
+      <% if (orders && orders.length > 0) { %>
+        <div class="orders-table-wrap">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% orders.forEach(o => { %>
+                <tr>
+                  <td><strong>#<%= o.orderNumber %></strong></td>
+                  <td><%= new Date(o.createdAt).toLocaleDateString() %></td>
+                  <td><%= o.items.map(i => `${i.name} (x${i.qty})`).join(', ') %></td>
+                  <td><strong>₹<%= o.totalAmount.toFixed(0) %></strong></td>
+                  <td><span class="status-badge status-<%= o.orderStatus.toLowerCase().replace(/\s+/g, '-') %>"><%= o.orderStatus %></span></td>
+                  <td>
+                    <a href="/order/track/<%= o._id %>" class="btn-action-sm">Track</a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state-mini">
+          <i class="ri-shopping-bag-3-line"></i>
+          <p>No orders placed yet. Delicious meals are waiting for you!</p>
+          <a href="/restaurants" class="btn-primary-sm">Order Food Now</a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

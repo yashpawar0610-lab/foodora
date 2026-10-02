@@ -1,0 +1,55 @@
+<div class="page-orders">
+  <div class="container">
+    <h1 class="page-title"><i class="ri-receipt-line"></i> My Orders</h1>
+
+    <% if (orders.length === 0) { %>
+    <div class="empty-state">
+      <i class="ri-receipt-line"></i>
+      <h3>No orders yet</h3>
+      <p>You haven't placed any orders. Start exploring!</p>
+      <a href="/restaurants" class="btn-primary-sm">Explore Restaurants</a>
+    </div>
+    <% } else { %>
+    <div class="orders-list">
+      <% orders.forEach(order => { %>
+      <div class="order-row-card">
+        <div class="orc-left">
+          <% if (order.restaurant && order.restaurant.logo) { %>
+          <img src="<%= order.restaurant.logo %>" alt="" class="orc-logo" onerror="this.src=''">
+          <% } else { %>
+          <div class="orc-logo-placeholder"><i class="ri-store-2-line"></i></div>
+          <% } %>
+          <div class="orc-info">
+            <h4 class="orc-name"><%= order.restaurantName %></h4>
+            <p class="orc-items"><%= order.items.map(i => i.name).slice(0,3).join(', ') %><% if (order.items.length > 3) { %> +<%= order.items.length - 3 %> more<% } %></p>
+            <p class="orc-date"><i class="ri-calendar-line"></i> <%= new Date(order.createdAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %></p>
+          </div>
+        </div>
+        <div class="orc-right">
+          <div class="orc-status status-<%= order.orderStatus.toLowerCase().replace(/\s+/g,'-') %>">
+            <%= order.orderStatus %>
+          </div>
+          <p class="orc-total">₹<%= order.totalAmount.toFixed(0) %></p>
+          <div class="orc-actions">
+            <a href="/order/<%= order._id %>/track" class="btn-sm">Track</a>
+            <% if (order.orderStatus === 'Delivered') { %>
+            <button class="btn-sm btn-reorder" onclick="reorder('<%= order._id %>')">Reorder</button>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+  </div>
+</div>
+
+<script>
+function reorder(orderId) {
+  fetch(`/order/${orderId}/reorder`, { method: 'POST' })
+    .then(r => r.json()).then(d => {
+      if (d.success) { showToast('Cart updated! Redirecting...', 'success'); setTimeout(() => window.location.href = '/cart', 1500); }
+      else showToast('Could not reorder.', 'error');
+    });
+}
+</script>

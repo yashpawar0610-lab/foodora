@@ -1,0 +1,182 @@
+<div class="owner-layout">
+  <div class="container owner-container">
+    <div class="owner-header-flex">
+      <div>
+        <div class="owner-tag"><i class="ri-store-3-line"></i> Partner Portal</div>
+        <h1 class="owner-title"><%= restaurant.name %></h1>
+        <p class="owner-subtitle"><i class="ri-map-pin-line"></i> <%= restaurant.area %>, <%= restaurant.city %> • <span class="badge-star"><i class="ri-star-fill"></i> <%= restaurant.rating %></span></p>
+      </div>
+      <div class="owner-actions">
+        <a href="/restaurant/<%= restaurant._id %>" class="btn-action-sm" target="_blank"><i class="ri-external-link-line"></i> View Live Page</a>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="admin-stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-blue"><i class="ri-shopping-bag-3-line"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Total Orders</span>
+          <h2 class="stat-value"><%= stats.totalOrders %></h2>
+          <span class="stat-sub">Lifetime volume</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green"><i class="ri-wallet-3-line"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Delivered Earnings</span>
+          <h2 class="stat-value">₹<%= stats.revenue.toLocaleString() %></h2>
+          <span class="stat-sub">Net payout</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-orange"><i class="ri-star-smile-line"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Kitchen Rating</span>
+          <h2 class="stat-value"><%= stats.rating %> / 5.0</h2>
+          <span class="stat-sub">Customer satisfaction</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-purple"><i class="ri-restaurant-line"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Dishes on Menu</span>
+          <h2 class="stat-value"><%= stats.menuItems %></h2>
+          <span class="stat-sub">Active catalog</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-grid-2col">
+      <!-- Live Orders Section -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="ri-notification-3-line"></i> Incoming Orders</h3>
+        </div>
+        <% if (orders && orders.length > 0) { %>
+          <div class="table-responsive">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% orders.forEach(o => { %>
+                <tr>
+                  <td><strong>#<%= o.orderNumber %></strong></td>
+                  <td><%= o.address ? o.address.street : 'Customer' %></td>
+                  <td>
+                    <small><%= o.items.map(i => `${i.name} (x${i.qty})`).join(', ') %></small>
+                  </td>
+                  <td>₹<%= o.totalAmount.toFixed(0) %></td>
+                  <td><span class="status-badge status-<%= o.orderStatus.toLowerCase().replace(/\s+/g, '-') %>" id="owner-status-<%= o._id %>"><%= o.orderStatus %></span></td>
+                  <td>
+                    <select class="admin-status-select" onchange="ownerUpdateOrderStatus('<%= o._id %>', this.value)">
+                      <% ['Placed', 'Confirmed', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered', 'Cancelled'].forEach(st => { %>
+                        <option value="<%= st %>" <%= o.orderStatus === st ? 'selected' : '' %>><%= st %></option>
+                      <% }) %>
+                    </select>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="empty-state-mini">
+            <i class="ri-shopping-cart-line"></i>
+            <p>No orders yet. Sit tight, customers in your area will order soon!</p>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Add Menu Item -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="ri-add-circle-line"></i> Add Dish to Menu</h3>
+        </div>
+        <form id="addMenuForm" onsubmit="handleAddNewDish(event)" class="styled-form">
+          <div class="form-group">
+            <label>Dish Name</label>
+            <input type="text" name="name" placeholder="e.g. Paneer Butter Masala" required>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea name="description" rows="2" placeholder="Rich creamy tomato gravy with cottage cheese cubes..." required></textarea>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Price (₹)</label>
+              <input type="number" name="price" placeholder="280" required>
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <input type="text" name="category" placeholder="Main Course, Starters, etc." required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Food Type</label>
+            <select name="isVeg">
+              <option value="true">🌱 Vegetarian</option>
+              <option value="false">🍖 Non-Vegetarian</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-primary-full"><i class="ri-check-line"></i> Add Dish to Menu</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Current Menu Catalog -->
+    <div class="admin-card" style="margin-top:2rem;">
+      <div class="admin-card-header">
+        <h3><i class="ri-restaurant-2-line"></i> Current Menu Items (<%= restaurant.menu.length %>)</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Dish</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Price</th>
+              <th>Stock Status</th>
+              <th>Toggle Availability</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% restaurant.menu.forEach(item => { %>
+            <tr>
+              <td>
+                <strong><%= item.name %></strong>
+                <p class="text-muted"><%= item.description ? item.description.slice(0, 60) + '...' : '' %></p>
+              </td>
+              <td><%= item.category %></td>
+              <td><span class="veg-badge-mini <%= item.isVeg ? 'veg' : 'non-veg' %>"></span> <%= item.isVeg ? 'Veg' : 'Non-Veg' %></td>
+              <td><strong>₹<%= item.price.toFixed(0) %></strong></td>
+              <td>
+                <span class="status-badge <%= item.isAvailable ? 'status-delivered' : 'status-cancelled' %>" id="avail-badge-<%= item._id %>">
+                  <%= item.isAvailable ? 'Available' : 'Sold Out' %>
+                </span>
+              </td>
+              <td>
+                <button class="btn-action-sm <%= item.isAvailable ? 'btn-danger' : 'btn-success' %>" id="avail-btn-<%= item._id %>" onclick="toggleMenuItemAvailability('<%= item._id %>')">
+                  <%= item.isAvailable ? 'Mark Sold Out' : 'Mark Available' %>
+                </button>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

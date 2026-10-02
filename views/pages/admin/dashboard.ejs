@@ -1,0 +1,121 @@
+<div class="admin-layout">
+  <div class="container admin-container">
+    <div class="admin-header-flex">
+      <div>
+        <h1 class="admin-title"><i class="ri-dashboard-3-line"></i> Admin Dashboard</h1>
+        <p class="admin-subtitle">Live overview of platform performance, orders, and restaurants</p>
+      </div>
+      <div class="admin-nav-pills">
+        <a href="/admin" class="admin-pill active"><i class="ri-dashboard-line"></i> Overview</a>
+        <a href="/admin/restaurants" class="admin-pill"><i class="ri-store-2-line"></i> Restaurants</a>
+        <a href="/admin/orders" class="admin-pill"><i class="ri-shopping-bag-line"></i> Orders</a>
+        <a href="/admin/users" class="admin-pill"><i class="ri-group-line"></i> Users</a>
+        <a href="/admin/reviews" class="admin-pill"><i class="ri-star-line"></i> Reviews</a>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="admin-stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-orange"><i class="ri-restaurant-2-line"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Total Restaurants</span>
+          <h2 class="stat-value"><%= stats.restaurants || 0 %></h2>
+          <span class="stat-sub">Active Kitchens</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-blue"><i class="ri-file-list-3-line"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Total Orders</span>
+          <h2 class="stat-value"><%= stats.orders || 0 %></h2>
+          <span class="stat-sub">Platform Orders</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green"><i class="ri-money-dollar-circle-line"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Gross Revenue</span>
+          <h2 class="stat-value">₹<%= (stats.revenue || 0).toLocaleString() %></h2>
+          <span class="stat-sub">Processed Volume</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-purple"><i class="ri-user-smile-line"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Active Customers</span>
+          <h2 class="stat-value"><%= stats.users || 0 %></h2>
+          <span class="stat-sub">Registered Users</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-grid-2col">
+      <!-- Recent Orders with live status updater -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="ri-time-line"></i> Recent Platform Orders</h3>
+          <a href="/admin/orders" class="link-styled">Manage All →</a>
+        </div>
+        <div class="table-responsive">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Restaurant</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Change Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentOrders.forEach(o => { %>
+              <tr>
+                <td><strong>#<%= o.orderNumber %></strong></td>
+                <td><%= o.user ? o.user.name : 'Guest' %></td>
+                <td><%= o.restaurant ? o.restaurant.name : 'Unknown' %></td>
+                <td>₹<%= o.totalAmount.toFixed(0) %></td>
+                <td><span class="status-badge status-<%= o.orderStatus.toLowerCase().replace(/\s+/g, '-') %>" id="status-badge-<%= o._id %>"><%= o.orderStatus %></span></td>
+                <td>
+                  <select class="admin-status-select" onchange="quickUpdateOrderStatus('<%= o._id %>', this.value)">
+                    <% ['Placed', 'Confirmed', 'Preparing', 'Ready', 'Out for Delivery', 'Delivered', 'Cancelled'].forEach(st => { %>
+                      <option value="<%= st %>" <%= o.orderStatus === st ? 'selected' : '' %>><%= st %></option>
+                    <% }) %>
+                  </select>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Top Performing Restaurants -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><i class="ri-trophy-line"></i> Top Rated Restaurants</h3>
+          <a href="/admin/restaurants" class="link-styled">View All →</a>
+        </div>
+        <div class="top-restaurants-list">
+          <% topRestaurants.forEach(r => { %>
+          <div class="top-restaurant-item">
+            <img src="<%= r.coverImage %>" alt="<%= r.name %>" class="tri-img" onerror="this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=100&q=80'">
+            <div class="tri-info">
+              <h4><%= r.name %></h4>
+              <p><%= r.cuisine.slice(0, 2).join(', ') %> • <%= r.area %></p>
+            </div>
+            <div class="tri-score">
+              <span class="badge-star"><i class="ri-star-fill"></i> <%= r.rating %></span>
+              <small><%= r.totalReviews %> reviews</small>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

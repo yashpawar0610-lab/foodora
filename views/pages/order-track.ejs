@@ -1,0 +1,136 @@
+<div class="page-track">
+  <div class="container">
+    <div class="track-card">
+      <div class="track-header">
+        <h1><i class="ri-map-2-line"></i> Track Your Order</h1>
+        <div class="track-order-num">Order #<%= order.orderNumber %></div>
+      </div>
+
+      <div class="track-restaurant">
+        <% if (order.restaurant && order.restaurant.logo) { %>
+        <img src="<%= order.restaurant.logo %>" alt="" class="track-rest-logo">
+        <% } %>
+        <div>
+          <p class="track-rest-name"><%= order.restaurantName %></p>
+          <p class="track-status-text status-<%= order.orderStatus.toLowerCase().replace(/\s+/g,'-') %>">
+            <i class="ri-circle-fill"></i> <%= order.orderStatus %>
+          </p>
+        </div>
+      </div>
+
+      <!-- Progress Steps -->
+      <div class="track-steps">
+        <%
+          const steps = [
+            { key: 'Placed', icon: 'ri-receipt-line', label: 'Order Placed' },
+            { key: 'Confirmed', icon: 'ri-checkbox-circle-line', label: 'Confirmed' },
+            { key: 'Preparing', icon: 'ri-fire-line', label: 'Preparing' },
+            { key: 'Out for Delivery', icon: 'ri-bike-line', label: 'Out for Delivery' },
+            { key: 'Delivered', icon: 'ri-home-smile-line', label: 'Delivered' }
+          ];
+          const stepOrder = ['Placed','Confirmed','Preparing','Out for Delivery','Delivered'];
+          const currentStep = stepOrder.indexOf(order.orderStatus === 'Ready' ? 'Preparing' : order.orderStatus);
+        %>
+        <% steps.forEach((step, i) => { %>
+        <div class="track-step <%= i <= currentStep ? 'done' : '' %> <%= i === currentStep ? 'current' : '' %>">
+          <div class="ts-icon-wrap">
+            <i class="<%= step.icon %>"></i>
+          </div>
+          <p class="ts-label"><%= step.label %></p>
+          <% const hist = order.statusHistory.find(h => h.status === step.key || (step.key === 'Preparing' && h.status === 'Ready')); %>
+          <% if (hist) { %>
+          <p class="ts-time"><%= new Date(hist.time).toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}) %></p>
+          <% } %>
+        </div>
+        <% if (i < steps.length - 1) { %><div class="ts-connector <%= i < currentStep ? 'done' : '' %>"></div><% } %>
+        <% }) %>
+      </div>
+
+      <!-- Items in Order -->
+      <div class="track-items">
+        <h3>Your Items</h3>
+        <% order.items.forEach(item => { %>
+        <div class="ti-row">
+          <span class="ti-name"><%= item.name %></span>
+          <span class="ti-qty">× <%= item.qty %></span>
+          <span class="ti-price">₹<%= (item.price * item.qty).toFixed(0) %></span>
+        </div>
+        <% }) %>
+        <div class="ti-total">Total: ₹<%= order.totalAmount.toFixed(0) %></div>
+      </div>
+
+      <!-- Delivery Address -->
+      <div class="track-address">
+        <i class="ri-map-pin-line"></i>
+        <div>
+          <p class="ta-label">Delivery To</p>
+          <p><%= order.deliveryAddress.street %>, <%= order.deliveryAddress.city %> - <%= order.deliveryAddress.pincode %></p>
+        </div>
+      </div>
+
+      <div class="track-actions">
+        <% if (!['Delivered','Cancelled','Out for Delivery'].includes(order.orderStatus)) { %>
+        <button class="btn-cancel-order" onclick="cancelOrder('<%= order._id %>')">
+          <i class="ri-close-circle-line"></i> Cancel Order
+        </button>
+        <% } %>
+        <% if (order.orderStatus === 'Delivered' && !order.isRated) { %>
+        <button class="btn-rate-order" onclick="openRateModal('<%= order._id %>')">
+          <i class="ri-star-line"></i> Rate Order
+        </button>
+        <% } %>
+        <a href="/orders" class="btn-back-orders"><i class="ri-arrow-left-line"></i> All Orders</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rate Modal -->
+<div class="modal-backdrop" id="rateModal">
+  <div class="modal-box" style="max-width:400px;">
+    <button class="modal-close" onclick="document.getElementById('rateModal').classList.remove('active')"><i class="ri-close-line"></i></button>
+    <h3 style="margin-bottom:1.2rem;">How was your order?</h3>
+    <div class="star-rating-input" id="rateStars">
+      <% for(let s=5; s>=1; s--) { %>
+      <input type="radio" name="rateVal" id="rs<%= s %>" value="<%= s %>">
+      <label for="rs<%= s %>"><i class="ri-star-fill"></i></label>
+      <% } %>
+    </div>
+    <textarea id="rateReview" placeholder="Share your experience..." rows="3" style="width:100%;margin-top:1rem;padding:0.75rem;border-radius:8px;border:1px solid var(--border);font-family:inherit;"></textarea>
+    <button class="btn-primary-full" style="margin-top:1rem;" onclick="submitRating('<%= order._id %>')">Submit Rating</button>
+  </div>
+</div>
+
+<script>
+function cancelOrder(id) {
+  if (!confirm('Are you sure you want to cancel this order?')) return;
+  fetch(`/order/${id}/cancel`, { method: 'POST' })
+    .then(r => r.json()).then(d => {
+      if (d.success) { showToast('Order cancelled.', 'success'); setTimeout(() => location.reload(), 1500); }
+      else showToast(d.msg || 'Cannot cancel.', 'error');
+    });
+}
+
+function openRateModal(id) {
+  document.getElementById('rateModal').classList.add('active');
+}
+
+function submitRating(orderId) {
+  const rating = document.querySelector('input[name="rateVal"]:checked')?.value;
+  const review = document.getElementById('rateReview').value;
+  if (!rating) { showToast('Please select a rating.', 'error'); return; }
+  fetch(`/order/${orderId}/rate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rating, review })
+  }).then(r => r.json()).then(d => {
+    if (d.success) { showToast('Thanks for rating!', 'success'); setTimeout(() => location.reload(), 1500); }
+  });
+}
+
+// Auto-refresh order status every 30 seconds
+setInterval(() => {
+  if (['Delivered','Cancelled'].includes('<%= order.orderStatus %>')) return;
+  location.reload();
+}, 30000);
+</script>

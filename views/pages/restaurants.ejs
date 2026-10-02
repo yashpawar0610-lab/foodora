@@ -1,0 +1,119 @@
+<div class="page-restaurants">
+  <!-- Page Header -->
+  <div class="restaurants-page-header">
+    <div class="container">
+      <h1><% if (typeof categoryTitle !== 'undefined') { %><%= categoryTitle %> Restaurants<% } else { %>All Restaurants<% } %></h1>
+      <p>Found <strong><%= restaurants.length %></strong> restaurants</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="restaurants-layout">
+      <!-- Filters Sidebar -->
+      <aside class="filters-sidebar" id="filtersSidebar">
+        <div class="filters-header">
+          <h3>Filters</h3>
+          <a href="/restaurants" class="clear-filters">Clear All</a>
+        </div>
+
+        <form id="filterForm" method="GET" action="/restaurants">
+          <div class="filter-group">
+            <h4>Sort By</h4>
+            <label class="radio-label"><input type="radio" name="sort" value="rating" <%= filters.sort === 'rating' ? 'checked' : '' %>> Top Rated</label>
+            <label class="radio-label"><input type="radio" name="sort" value="delivery_time" <%= filters.sort === 'delivery_time' ? 'checked' : '' %>> Delivery Time</label>
+            <label class="radio-label"><input type="radio" name="sort" value="min_order" <%= filters.sort === 'min_order' ? 'checked' : '' %>> Min Order</label>
+          </div>
+
+          <div class="filter-group">
+            <h4>Filters</h4>
+            <label class="check-label">
+              <input type="checkbox" name="veg" value="true" <%= filters.veg === 'true' ? 'checked' : '' %>>
+              <span class="veg-icon">🟢</span> Pure Veg
+            </label>
+            <label class="check-label">
+              <input type="checkbox" name="offer" value="true" <%= filters.offer === 'true' ? 'checked' : '' %>>
+              <span>🏷️</span> Has Offer
+            </label>
+          </div>
+
+          <div class="filter-group">
+            <h4>Cuisine</h4>
+            <% cuisineList.forEach(c => { %>
+            <label class="check-label">
+              <input type="checkbox" name="cuisine" value="<%= c %>" <%= filters.cuisine === c ? 'checked' : '' %>>
+              <%= c %>
+            </label>
+            <% }) %>
+          </div>
+
+          <% if (filters.search) { %><input type="hidden" name="search" value="<%= filters.search %>"><% } %>
+          <button type="submit" class="btn-apply-filter">Apply Filters</button>
+        </form>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="restaurants-main">
+        <!-- Search + Filter Bar -->
+        <div class="restaurants-toolbar">
+          <div class="toolbar-search">
+            <i class="ri-search-line"></i>
+            <input type="text" id="toolbarSearch" placeholder="Search within results..." value="<%= filters.search || '' %>">
+          </div>
+          <button class="filter-toggle-btn" id="filterToggleBtn">
+            <i class="ri-equalizer-line"></i> Filters
+          </button>
+        </div>
+
+        <!-- Quick Category Filters -->
+        <div class="quick-cuisines">
+          <% cuisineList.forEach(c => { %>
+          <a href="/restaurants?cuisine=<%= c %>" class="cuisine-chip <%= filters.cuisine === c ? 'active' : '' %>"><%= c %></a>
+          <% }) %>
+        </div>
+
+        <!-- Restaurant Grid -->
+        <% if (restaurants.length === 0) { %>
+        <div class="empty-state">
+          <i class="ri-restaurant-2-line"></i>
+          <h3>No restaurants found</h3>
+          <p>Try adjusting your filters or search term.</p>
+          <a href="/restaurants" class="btn-primary-sm">Clear Filters</a>
+        </div>
+        <% } else { %>
+        <div class="restaurant-grid" id="restaurantsGrid">
+          <% restaurants.forEach(r => { %>
+          <%- include('../partials/restaurant-card', { r }) %>
+          <% }) %>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const filterToggleBtn = document.getElementById('filterToggleBtn');
+const sidebar = document.getElementById('filtersSidebar');
+filterToggleBtn && filterToggleBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+});
+
+// Auto-submit filter form on radio/checkbox change
+document.querySelectorAll('#filterForm input[type="radio"], #filterForm input[type="checkbox"]')
+  .forEach(el => el.addEventListener('change', () => document.getElementById('filterForm').submit()));
+
+// Toolbar search
+const toolbarSearch = document.getElementById('toolbarSearch');
+if (toolbarSearch) {
+  let t;
+  toolbarSearch.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(() => {
+      const q = toolbarSearch.value.trim();
+      const url = new URL(window.location.href);
+      if (q) url.searchParams.set('search', q); else url.searchParams.delete('search');
+      window.location.href = url.toString();
+    }, 600);
+  });
+}
+</script>

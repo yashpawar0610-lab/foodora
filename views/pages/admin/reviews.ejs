@@ -1,0 +1,50 @@
+<div class="admin-layout">
+  <div class="container admin-container">
+    <div class="admin-header-flex">
+      <div>
+        <h1 class="admin-title"><i class="ri-star-line"></i> Manage Reviews & Ratings</h1>
+        <p class="admin-subtitle">Monitor customer feedback, ratings and moderate content</p>
+      </div>
+      <div class="admin-nav-pills">
+        <a href="/admin" class="admin-pill"><i class="ri-dashboard-line"></i> Overview</a>
+        <a href="/admin/restaurants" class="admin-pill"><i class="ri-store-2-line"></i> Restaurants</a>
+        <a href="/admin/orders" class="admin-pill"><i class="ri-shopping-bag-line"></i> Orders</a>
+        <a href="/admin/users" class="admin-pill"><i class="ri-group-line"></i> Users</a>
+        <a href="/admin/reviews" class="admin-pill active"><i class="ri-star-line"></i> Reviews</a>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="table-responsive">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Restaurant</th>
+              <th>Rating</th>
+              <th>Comment</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% reviews.forEach(rev => { %>
+            <tr id="review-row-<%= rev._id %>">
+              <td><strong><%= rev.user ? rev.user.name : 'Anonymous' %></strong></td>
+              <td><%= rev.restaurant ? rev.restaurant.name : 'Unknown' %></td>
+              <td><span class="badge-star"><i class="ri-star-fill"></i> <%= rev.rating %>/5</span></td>
+              <td><%= rev.comment %></td>
+              <td><%= new Date(rev.createdAt).toLocaleDateString() %></td>
+              <td>
+                <button class="btn-action-sm btn-danger" onclick="deleteReview('<%= rev._id %>')">
+                  <i class="ri-delete-bin-line"></i> Delete
+                </button>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
